@@ -1,0 +1,12 @@
+[submodule "bot"]
+	path = bot
+	url = https://github.com/iccet/stego-bot.git
+[submodule "backend"]
+	path = backend
+	url = https://github.com/iccet/stego-backend.git
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/iccet/stego-frontend.git
+[submodule "bff"]
+	path = bff
+	url = https://github.com/iccet/stego-bff.git
