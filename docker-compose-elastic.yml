@@ -1,0 +1,79 @@
+version: '3.9'
+
+services:
+  filebeat:
+    build:
+      context: filebeat
+      args:
+        TAG: ${TAG}
+    hostname: "{{.Node.Hostname}}-filebeat"
+    user: root
+    depends_on:
+      - elasticsearch
+      - kibana
+    networks:
+      - elastic
+      - kafka
+      - stego
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers/:/var/lib/docker/containers/:ro
+      - /var/log/:/var/log/:ro
+      - /var/log/audit/:/var/log/audit/:ro
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch:9200
+      - KIBANA_HOST=kibana:5601
+      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME:-elastic}
+      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-changeme}
+    deploy:
+      mode: global
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:${TAG}
+    ports:
+      - 9200:9200
+    expose:
+      - 9200
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - xpack.monitoring.enabled=true
+      - xpack.watcher.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+    networks:
+      - elastic
+    labels:
+      co.elastic.logs/module: elasticsearch
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:${TAG}
+    ports:
+      - 5600:5601
+    expose:
+      - 5600
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_URL=https://elasticsearch:9200
+    networks:
+      - elastic
+    labels:
+      co.elastic.logs/module: kibana
+      co.elastic.metrics/module: kibana
+
+networks:
+  kafka:
+    external: true
+  stego:
+    external: true
+  elastic:
+    driver: bridge
+
+volumes:
+
+  filebeat:
+  elasticsearch-data:
+    driver: local
