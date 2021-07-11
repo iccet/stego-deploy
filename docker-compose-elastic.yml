@@ -1,6 +1,34 @@
 version: '3.9'
 
 services:
+  metricbeat:
+    build:
+      context: metricbeat
+      args:
+        TAG: ${TAG}
+    hostname: "{{.Node.Hostname}}-metricbeat"
+    user: root
+    depends_on:
+      - elasticsearch
+      - kibana
+    networks:
+      - elastic
+      - kafka
+      - stego
+    volumes:
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - metricbeat:/usr/share/metricbeat/data
+    environment:
+      - ELASTICSEARCH_HOST=elasticsearch:9200
+      - KIBANA_HOST=kibana:5601
+      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME:-elastic}
+      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-changeme}
+    deploy:
+      mode: global
+
   filebeat:
     build:
       context: filebeat
@@ -46,6 +74,7 @@ services:
       - elastic
     labels:
       co.elastic.logs/module: elasticsearch
+      co.elastic.metrics/module: elasticsearch
 
   kibana:
     container_name: kibana
@@ -73,7 +102,7 @@ networks:
     driver: bridge
 
 volumes:
-
+  metricbeat:
   filebeat:
   elasticsearch-data:
     driver: local

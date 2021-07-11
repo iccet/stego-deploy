@@ -7,47 +7,6 @@ filebeat.modules:
     auth:
       enabled: true
 
-  - module: redis
-    log:
-      enabled: true
-    slowlog:
-      enabled: true
-      var.hosts:
-        - redis:6379
-
-  - module: elasticsearch
-    server:
-      enabled: true
-    gc:
-      enabled: true
-    audit:
-      enabled: true
-    slowlog:
-      enabled: true
-    deprecation:
-      enabled: true
-
-  - module: kibana
-    log:
-      enabled: true
-    audit:
-      enabled: true
-
-  - module: auditd
-    log:
-      enabled: true
-
-  - module: kafka
-    log:
-      enabled: true
-
-  - module: postgresql
-    log:
-      enabled: true
-      hints.enabled: true
-      var.paths:
-        - /var/log/postgresql/*.log
-
 filebeat.autodiscover:
   providers:
     - type: docker

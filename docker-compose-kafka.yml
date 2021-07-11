@@ -23,6 +23,7 @@ services:
       - zookeeper
     labels:
       co.elastic.logs/module: kafka
+      co.elastic.metrics/module: kafka
     volumes:
       - broker_data:/var/lib/kafka/data
     ports:
